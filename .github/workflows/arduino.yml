@@ -1,0 +1,20 @@
+name: arduino
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arduino/setup-arduino-cli@v2
+      - name: Install AVR core
+        run: |
+          arduino-cli core update-index
+          arduino-cli core install arduino:avr
+      - name: Compile parser example
+        run: arduino-cli compile --fqbn arduino:avr:mega --libraries . examples/arduino/LineParserExample
+      - name: Compile watch builder example
+        run: arduino-cli compile --fqbn arduino:avr:mega --libraries . examples/arduino/WatchBuilderExample
