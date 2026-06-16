@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <pypilot_client_protocol_arduino.hpp>
+#include <pypilot_client_protocol.hpp>
 
 void setup() {
   Serial.begin(115200);
