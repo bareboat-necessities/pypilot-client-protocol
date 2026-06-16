@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <pypilot_client_protocol_arduino.hpp>
+#include <pypilot_client_protocol.hpp>
 
 pypilot_client_protocol::LineParser parser;
 
