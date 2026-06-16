@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <pypilot_client_protocol.hpp>
+#include <pypilot_client_protocol_arduino.hpp>
 
 pypilot_client_protocol::LineParser parser;
 
@@ -12,12 +12,12 @@ void setup() {
 void loop() {
   while (Serial.available()) {
     pypilot_client_protocol::Record record;
-    std::string error;
+    const char* error = nullptr;
     if (parser.push((char)Serial.read(), record, &error)) {
       Serial.print("name=");
-      Serial.print(record.name.c_str());
+      Serial.print(record.name);
       Serial.print(" value=");
-      Serial.println(record.value.dump().c_str());
+      Serial.println(record.value);
     }
   }
 }
