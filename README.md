@@ -13,12 +13,12 @@ values={...}
 ## Features
 
 - newline-delimited `name=json` frame parser
-- JSON value parser/serializer covering null, booleans, numbers, strings, arrays, and objects
+- ArduinoJson-based JSON parsing and serialization
+- JSON values handled through a small `JsonValue` wrapper around an owned ArduinoJson document
 - helpers for `set`, `watch`, `unwatch`, `watch={"values":true}`, and `udp_port`
-- incoming update callback model
-- value metadata parsing as generic JSON objects
+- incoming update polling model
+- value metadata parsing as ArduinoJson objects
 - Linux POSIX TCP transport
-- optional Linux UDP receiver for `udp_port` watched output
 - Arduino `Client` transport wrapper
 - Linux examples and unit tests
 
@@ -34,6 +34,20 @@ watch={"ap.heading":0.5,"ap.enabled":true}
 ```
 
 Only the right-hand side is JSON. The whole line is not a JSON object.
+
+## Dependency
+
+Arduino builds declare this library dependency:
+
+```text
+ArduinoJson
+```
+
+CMake builds fetch ArduinoJson by default through `FetchContent`. To use a locally installed/include-path-provided copy instead, configure with:
+
+```bash
+cmake -S . -B build -DPYPILOT_CLIENT_PROTOCOL_FETCH_ARDUINOJSON=OFF
+```
 
 ## Build on Linux
 
@@ -53,7 +67,7 @@ ctest --test-dir build --output-on-failure
 
 ## Optional UDP output
 
-The helper `make_udp_port(port)` sends `udp_port=<port>`. On Linux, `LinuxUdpReceiver` can bind that port and parse incoming newline-delimited update records from UDP datagrams. The TCP connection remains the control channel.
+The helper `make_udp_port(port)` sends `udp_port=<port>`. The TCP connection remains the control channel.
 
 ## Arduino
 
@@ -63,7 +77,23 @@ Include:
 #include <pypilot_client_protocol.hpp>
 ```
 
-The Arduino wrapper accepts any object compatible with Arduino `Client`/`Stream` methods: `connect`, `connected`, `available`, `read`, `write`, and `stop`.
+The Arduino protocol wrapper accepts any object derived from Arduino `Client`:
+
+```cpp
+Client& stream = client;
+pypilot_client_protocol::ClientProtocol protocol(stream);
+protocol.watch_periodic("ap.heading", 0.5);
+```
+
+Incoming records parse their JSON value into an owned ArduinoJson-backed `JsonValue`:
+
+```cpp
+pypilot_client_protocol::Record record;
+if (protocol.poll(record)) {
+  const char* name = record.name;
+  double value = record.value.as_number();
+}
+```
 
 ## License
 
