@@ -19,7 +19,8 @@ int main(int argc, char** argv) {
         pypilot_client_protocol::Record record;
         if (client.poll(record)) {
             if (record.name == "values") {
-                for (const auto& kv : record.value.as_object()) std::cout << kv.first << "\n";
+                JsonObjectConst values = record.value.as_object();
+                for (JsonPairConst kv : values) std::cout << kv.key().c_str() << "\n";
                 return 0;
             }
             if (record.name == "error") std::cerr << "server error: " << record.value.dump() << "\n";
