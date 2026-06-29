@@ -12,6 +12,8 @@
 
 namespace pypilot_client_protocol {
 
+using Real = float;
+
 #ifndef PYPILOT_CLIENT_PROTOCOL_MAX_NAME
 #define PYPILOT_CLIENT_PROTOCOL_MAX_NAME 64
 #endif
@@ -98,7 +100,8 @@ inline size_t make_set_bool(char* out, size_t cap, const char* name, bool value)
     return make_set(out, cap, name, value);
 }
 
-inline size_t make_set_number(char* out, size_t cap, const char* name, double value) {
+template <typename ValueReal = Real>
+inline size_t make_set_number(char* out, size_t cap, const char* name, ValueReal value) {
     return make_set(out, cap, name, value);
 }
 
@@ -124,7 +127,8 @@ inline size_t make_watch_continuous(char* out, size_t cap, const char* name) {
     return make_watch_value(out, cap, name, true);
 }
 
-inline size_t make_watch_periodic(char* out, size_t cap, const char* name, double seconds) {
+template <typename ValueReal = Real>
+inline size_t make_watch_periodic(char* out, size_t cap, const char* name, ValueReal seconds) {
     return make_watch_value(out, cap, name, seconds);
 }
 
