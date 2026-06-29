@@ -1,7 +1,10 @@
 #include <Arduino.h>
+#include <ArduinoJson.h>
 #include <pypilot_client_protocol.hpp>
 
-pypilot_client_protocol::LineParser parser;
+pypilot_client_protocol::LineDecoder decoder;
+char record_name[PYPILOT_CLIENT_PROTOCOL_MAX_NAME];
+JsonDocument record_value;
 
 void setup() {
   Serial.begin(115200);
@@ -11,13 +14,18 @@ void setup() {
 
 void loop() {
   while (Serial.available()) {
-    pypilot_client_protocol::Record record;
     const char* error = nullptr;
-    if (parser.push((char)Serial.read(), record, &error)) {
+    if (decoder.push((char)Serial.read(), record_name, sizeof(record_name), record_value, &error)) {
       Serial.print("name=");
-      Serial.print(record.name);
+      Serial.print(record_name);
       Serial.print(" value=");
-      Serial.println(record.value);
+      serializeJson(record_value, Serial);
+      Serial.println();
+      record_value.clear();
+    } else if (error) {
+      Serial.print("error=");
+      Serial.println(error);
+      record_value.clear();
     }
   }
 }
