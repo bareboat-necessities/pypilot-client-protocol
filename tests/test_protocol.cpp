@@ -10,7 +10,7 @@ using namespace pypilot_client_protocol;
 int main() {
     const char* error = 0;
     char name[PYPILOT_CLIENT_PROTOCOL_MAX_NAME];
-    PYPILOT_CLIENT_PROTOCOL_LOCAL_DOC(value);
+    JsonDocument value;
 
     assert(parse_record("ap.enabled=true\n", name, sizeof(name), value, &error));
     assert(std::strcmp(name, "ap.enabled") == 0);
