@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.16)
 project(pypilot_client_protocol LANGUAGES CXX)
 
 option(PYPILOT_CLIENT_PROTOCOL_BUILD_TESTS "Build tests" ON)
-option(PYPILOT_CLIENT_PROTOCOL_BUILD_EXAMPLES "Build Linux examples" ON)
 option(PYPILOT_CLIENT_PROTOCOL_FETCH_ARDUINOJSON "Fetch ArduinoJson for non-Arduino builds" ON)
 set(PYPILOT_CLIENT_PROTOCOL_ARDUINOJSON_GIT_TAG "v7.4.2" CACHE STRING "ArduinoJson git tag used by FetchContent")
 
@@ -22,14 +21,6 @@ if(PYPILOT_CLIENT_PROTOCOL_FETCH_ARDUINOJSON)
     FetchContent_Populate(arduinojson)
   endif()
   target_include_directories(pypilot_client_protocol INTERFACE ${arduinojson_SOURCE_DIR}/src)
-endif()
-
-if(PYPILOT_CLIENT_PROTOCOL_BUILD_EXAMPLES AND UNIX AND NOT APPLE)
-  foreach(example pypilot-list-values pypilot-monitor pypilot-set)
-    add_executable(${example} examples/linux/${example}.cpp)
-    target_link_libraries(${example} PRIVATE pypilot_client_protocol)
-    target_compile_definitions(${example} PRIVATE PYPILOT_CLIENT_PROTOCOL_ENABLE_LINUX_TCP)
-  endforeach()
 endif()
 
 if(PYPILOT_CLIENT_PROTOCOL_BUILD_TESTS)
