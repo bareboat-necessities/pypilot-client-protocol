@@ -19,13 +19,13 @@ int main() {
     value.clear();
     assert(parse_record("ap.heading=123.4\n", name, sizeof(name), value, &error));
     assert(std::strcmp(name, "ap.heading") == 0);
-    assert(std::fabs(value.as<double>() - 123.4) < 0.001);
+    assert(std::fabs(value.as<Real>() - Real(123.4f)) < Real(0.001f));
 
     char out[128];
     make_set_bool(out, sizeof(out), "ap.enabled", false);
     assert(std::string(out) == "ap.enabled=false\n");
 
-    make_watch_periodic(out, sizeof(out), "ap.heading", 0.5);
+    make_watch_periodic(out, sizeof(out), "ap.heading", Real(0.5f));
     assert(std::string(out).find("watch=") == 0);
     assert(std::string(out).find("ap.heading") != std::string::npos);
 
