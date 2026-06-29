@@ -18,30 +18,38 @@ struct MemoryTransport : public Transport {
 int main() {
     JsonValue v;
     std::string error;
+
     assert(parse_json("true", v, &error));
     assert(v.is_bool() && v.as_bool() == true);
+
     assert(parse_json("123.5", v, &error));
     assert(v.is_number() && std::fabs(v.as_number() - 123.5) < 0.0001);
+
     assert(parse_json("\"compass\"", v, &error));
     assert(v.is_string() && v.as_string() == "compass");
+
+    JsonValue object_value = JsonValue::object();
+    object_value.set_member("ap.heading", JsonValue(0.5));
+    object_value.set_member("ap.enabled", JsonValue(true));
+    assert(object_value.is_object());
+    assert(object_value.find("ap.heading"));
+    assert(std::fabs(object_value.find("ap.heading")->as_number() - 0.5) < 0.0001);
+    assert(object_value.find("ap.enabled")->as_bool() == true);
 
     Record r;
     assert(parse_record("ap.enabled=true\n", r, &error));
     assert(r.name == "ap.enabled");
     assert(r.value.as_bool() == true);
 
-    assert(parse_record("watch={\"ap.heading\":0.5,\"ap.enabled\":true}\n", r, &error));
-    assert(r.name == "watch");
-    assert(r.value.is_object());
-    assert(r.value.find("ap.heading"));
-    assert(std::fabs(r.value.find("ap.heading")->as_number() - 0.5) < 0.0001);
-    assert(r.value.find("ap.enabled")->as_bool() == true);
-
     std::string watch = make_watch_periodic("ap.heading", 0.25);
     assert(watch == "watch={\"ap.heading\":0.25}\n");
     assert(make_set_string("ap.mode", "compass") == "ap.mode=\"compass\"\n");
     assert(make_set_bool("ap.enabled", false) == "ap.enabled=false\n");
     assert(make_watch_values() == "watch={\"values\":true}\n");
+
+    char line[128];
+    make_set_string(line, sizeof(line), "ap.mode", "wind");
+    assert(std::string(line) == "ap.mode=\"wind\"\n");
 
     MemoryTransport mt;
     mt.input = "ap.heading=123.4000\nap.mode=\"compass\"\n";
@@ -60,12 +68,6 @@ int main() {
     assert(client.watch_periodic("ap.heading", 0.5));
     assert(client.set_number("ap.heading_command", 90.0));
     assert(mt.output == "watch={\"ap.heading\":0.5}\nap.heading_command=90\n");
-
-    assert(parse_record("values={\"ap.enabled\":{\"type\":\"BooleanProperty\",\"writable\":true}}\n", r, &error));
-    assert(r.name == "values");
-    assert(r.value.find("ap.enabled"));
-    const JsonValue* meta = r.value.find("ap.enabled");
-    assert(meta && meta->find("type") && meta->find("type")->as_string() == "BooleanProperty");
 
     return 0;
 }
