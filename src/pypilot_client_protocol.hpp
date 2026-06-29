@@ -6,6 +6,10 @@
 
 #include <ArduinoJson.h>
 
+#if ARDUINOJSON_VERSION_MAJOR < 7
+#error "pypilot-client-protocol requires ArduinoJson 7 or newer"
+#endif
+
 namespace pypilot_client_protocol {
 
 #ifndef PYPILOT_CLIENT_PROTOCOL_MAX_NAME
@@ -14,16 +18,6 @@ namespace pypilot_client_protocol {
 
 #ifndef PYPILOT_CLIENT_PROTOCOL_MAX_LINE
 #define PYPILOT_CLIENT_PROTOCOL_MAX_LINE 512
-#endif
-
-#ifndef PYPILOT_CLIENT_PROTOCOL_JSON_CAPACITY
-#define PYPILOT_CLIENT_PROTOCOL_JSON_CAPACITY 2048
-#endif
-
-#if ARDUINOJSON_VERSION_MAJOR >= 7
-#define PYPILOT_CLIENT_PROTOCOL_LOCAL_DOC(name) JsonDocument name
-#else
-#define PYPILOT_CLIENT_PROTOCOL_LOCAL_DOC(name) DynamicJsonDocument name(PYPILOT_CLIENT_PROTOCOL_JSON_CAPACITY)
 #endif
 
 inline void copy_text(char* out, size_t cap, const char* text, size_t len) {
@@ -94,44 +88,44 @@ inline size_t make_record(char* out, size_t cap, const char* name, JsonVariantCo
 }
 
 inline size_t make_set_bool(char* out, size_t cap, const char* name, bool value) {
-    PYPILOT_CLIENT_PROTOCOL_LOCAL_DOC(doc);
+    JsonDocument doc;
     doc.set(value);
     return make_record(out, cap, name, doc.as<JsonVariantConst>());
 }
 
 inline size_t make_set_number(char* out, size_t cap, const char* name, double value) {
-    PYPILOT_CLIENT_PROTOCOL_LOCAL_DOC(doc);
+    JsonDocument doc;
     doc.set(value);
     return make_record(out, cap, name, doc.as<JsonVariantConst>());
 }
 
 inline size_t make_set_string(char* out, size_t cap, const char* name, const char* value) {
-    PYPILOT_CLIENT_PROTOCOL_LOCAL_DOC(doc);
+    JsonDocument doc;
     doc.set(value ? value : "");
     return make_record(out, cap, name, doc.as<JsonVariantConst>());
 }
 
 inline size_t make_watch(char* out, size_t cap, const char* name, JsonVariantConst period) {
-    PYPILOT_CLIENT_PROTOCOL_LOCAL_DOC(doc);
+    JsonDocument doc;
     JsonObject obj = doc.to<JsonObject>();
     obj[name ? name : ""].set(period);
     return make_record(out, cap, "watch", doc.as<JsonVariantConst>());
 }
 
 inline size_t make_watch_continuous(char* out, size_t cap, const char* name) {
-    PYPILOT_CLIENT_PROTOCOL_LOCAL_DOC(period);
+    JsonDocument period;
     period.set(true);
     return make_watch(out, cap, name, period.as<JsonVariantConst>());
 }
 
 inline size_t make_watch_periodic(char* out, size_t cap, const char* name, double seconds) {
-    PYPILOT_CLIENT_PROTOCOL_LOCAL_DOC(period);
+    JsonDocument period;
     period.set(seconds);
     return make_watch(out, cap, name, period.as<JsonVariantConst>());
 }
 
 inline size_t make_unwatch(char* out, size_t cap, const char* name) {
-    PYPILOT_CLIENT_PROTOCOL_LOCAL_DOC(period);
+    JsonDocument period;
     period.set(false);
     return make_watch(out, cap, name, period.as<JsonVariantConst>());
 }
@@ -166,7 +160,5 @@ private:
     char buffer_[PYPILOT_CLIENT_PROTOCOL_MAX_LINE];
     size_t pos_;
 };
-
-#undef PYPILOT_CLIENT_PROTOCOL_LOCAL_DOC
 
 } // namespace pypilot_client_protocol
