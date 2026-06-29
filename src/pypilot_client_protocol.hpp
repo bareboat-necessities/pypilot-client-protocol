@@ -87,22 +87,23 @@ inline size_t make_record(char* out, size_t cap, const char* name, JsonVariantCo
     return pos;
 }
 
-inline size_t make_set_bool(char* out, size_t cap, const char* name, bool value) {
+template <typename T>
+inline size_t make_set(char* out, size_t cap, const char* name, const T& value) {
     JsonDocument doc;
     doc.set(value);
     return make_record(out, cap, name, doc.as<JsonVariantConst>());
+}
+
+inline size_t make_set_bool(char* out, size_t cap, const char* name, bool value) {
+    return make_set(out, cap, name, value);
 }
 
 inline size_t make_set_number(char* out, size_t cap, const char* name, double value) {
-    JsonDocument doc;
-    doc.set(value);
-    return make_record(out, cap, name, doc.as<JsonVariantConst>());
+    return make_set(out, cap, name, value);
 }
 
 inline size_t make_set_string(char* out, size_t cap, const char* name, const char* value) {
-    JsonDocument doc;
-    doc.set(value ? value : "");
-    return make_record(out, cap, name, doc.as<JsonVariantConst>());
+    return make_set(out, cap, name, value ? value : "");
 }
 
 inline size_t make_watch(char* out, size_t cap, const char* name, JsonVariantConst period) {
@@ -112,22 +113,23 @@ inline size_t make_watch(char* out, size_t cap, const char* name, JsonVariantCon
     return make_record(out, cap, "watch", doc.as<JsonVariantConst>());
 }
 
+template <typename T>
+inline size_t make_watch_value(char* out, size_t cap, const char* name, const T& value) {
+    JsonDocument doc;
+    doc.set(value);
+    return make_watch(out, cap, name, doc.as<JsonVariantConst>());
+}
+
 inline size_t make_watch_continuous(char* out, size_t cap, const char* name) {
-    JsonDocument period;
-    period.set(true);
-    return make_watch(out, cap, name, period.as<JsonVariantConst>());
+    return make_watch_value(out, cap, name, true);
 }
 
 inline size_t make_watch_periodic(char* out, size_t cap, const char* name, double seconds) {
-    JsonDocument period;
-    period.set(seconds);
-    return make_watch(out, cap, name, period.as<JsonVariantConst>());
+    return make_watch_value(out, cap, name, seconds);
 }
 
 inline size_t make_unwatch(char* out, size_t cap, const char* name) {
-    JsonDocument period;
-    period.set(false);
-    return make_watch(out, cap, name, period.as<JsonVariantConst>());
+    return make_watch_value(out, cap, name, false);
 }
 
 inline size_t make_watch_values(char* out, size_t cap) {
